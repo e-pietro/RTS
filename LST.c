@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#define MAX_N 26 // Num max de tarfeas
-#define MAX_T 2048 // Tempo max
+#define MAX_N 26 
+#define MAX_T 2048 
 
 typedef struct {
     unsigned time_comp;
