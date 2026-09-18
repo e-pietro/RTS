@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#define MAX_N 26
-#define MAX_T 2048
+#define MAX_N 26 // Num max de tarfeas
+#define MAX_T 2048 // Tempo max
 
 typedef struct {
     unsigned time_comp;
@@ -11,23 +11,27 @@ typedef struct {
 
 int main(void)
 {
-    unsigned n, t;
-    task_t tasks[MAX_N];
+    unsigned n, t; // n = quantidade de tarfeas ; t = tempo de simulacao
+    task_t tasks[MAX_N]; // guarda as tarfeas
     
     while (1)
     {
+        // leitura
         if (scanf("%u%u", &n, &t) != 2) break;
         if (n == 0 || t == 0) break;
 
         for(int i = 0; i < n; i++)
             scanf("%u %u %u", &tasks[i].time_comp, &tasks[i].period, &tasks[i].deadline);
+
+        // processamento
+        char grade[MAX_T+1]; // diagrama de gantt
+        unsigned    relogio = 0, // tempo atual da simulacao
+                    n_pre   = 0, // contador de preemp
+                    n_tcont = 0; // contador de troca
         
-        char grade[MAX_T+1];
-        unsigned relogio = 0, n_pre = 0, n_tcont = 0;
-        
-        unsigned tc_rest[MAX_N];
-        unsigned abs_deadline[MAX_N];
-        int pronta[MAX_N];
+        unsigned tc_rest[MAX_N]; // tempo restante
+        unsigned abs_deadline[MAX_N]; // prazo limite
+        int pronta[MAX_N]; 
 
         for(int i = 0; i < n; i++)
         {
@@ -36,11 +40,11 @@ int main(void)
             pronta[i] = 0;
         }
 
-        int tarefa_atual = -1;
+        int tarefa_atual = -1; // proc ocioso
 
         while (relogio < t)
         {
-            // 1. Atualização de chegadas no relógio atual
+            //  atualizacao de chegadas no relogio atual
             for (int i = 0; i < n; i++)
             {
                 if (relogio % tasks[i].period == 0)
@@ -51,7 +55,7 @@ int main(void)
                 }
             }
 
-            // 2. Busca da tarefa de menor folga
+            // busca da tarefa com menor folga
             int escolhida = -1;
             int menor_folga = 999999;
 
@@ -61,7 +65,7 @@ int main(void)
                 {
                     int folga = (int)abs_deadline[i] - (int)relogio - (int)tc_rest[i];
 
-                    // Critério de menor folga (mantendo a menor ordem de ID em caso de empate)
+                    // criterio de menor folga (mantendo a menor ordem de ID em caso de empate)
                     if (folga < menor_folga)
                     {
                         menor_folga = folga;
@@ -70,20 +74,20 @@ int main(void)
                 }
             }
 
-            // 3. Contagem de troca de contexto e preempção
+            // contagem de troca de contexto e preempção
             if (escolhida != tarefa_atual)
             {
                 if (tarefa_atual != -1)
                 {
                     if (escolhida == -1)
                     {
-                        // indo para idle: conta como preempção sempre,
+                        // indo para idle: conta como preemp
                         // mesmo que a tarefa anterior tenha terminado naturalmente
                         n_pre++;
                     }
                     else if (tc_rest[tarefa_atual] > 0)
                     {
-                        // troca entre tarefas: só conta preempção se a anterior
+                        // troca entre tarefas: so conta preemp se a anterior
                         // ainda tinha trabalho restante
                         n_pre++;
                     }
@@ -93,7 +97,7 @@ int main(void)
                 tarefa_atual = escolhida;
             }
 
-            // 4. Execução de 1 unidade de tempo
+            // exec de 1 unidade de tempo
             if (escolhida != -1)
             {
                 grade[relogio] = 'A' + escolhida;
@@ -112,7 +116,7 @@ int main(void)
             relogio++;
         }
 
-        // Caso a simulação termine com uma tarefa ainda pela metade, conta preempção final
+        // caso a simulacao termine com uma tarefa ainda pela metade, conta preemp final
         if (relogio == t && tarefa_atual != -1 && tc_rest[tarefa_atual] > 0)
         {
             n_pre++;
